@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import praw
 from matplotlib import pyplot as plt
+
 from image_parsing_utils import get_photos_from_post
 
 CLIENT_ID = os.environ['CLIENT_ID']
@@ -134,7 +135,7 @@ def get_comment_bf_est(comment):
 
 def create_folder_bin(raw_data, photos_path):
     """ Divides all the pictures into folders, based on which bin does the picture falls in. (i.e. in the range of
-    4-7.9%, 8-11% and so on... """
+    4-7.9%, 8-11% and so on)... """
     df = pd.read_csv(raw_data)
     # Group the DataFrame by picture name
     grouped = df.groupby("id")
