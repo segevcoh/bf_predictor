@@ -95,6 +95,15 @@ def filter_comments_with_low_score(csv_file):
     df.to_csv(csv_file, index=False)
 
 
+def get_comment_bf_est(comment):
+    """ Extract a bf% estimate from a given comment """
+    pattern = r'\b\d+\.\d|\b\d\'?\d?\b'
+    comment_est = re.findall(pattern, comment)
+    # remove numbers with inches (e.g., 5'7) and numbers which are too large or too small (probably not bf)
+    comment_est = [float(m) for m in comment_est if "'" not in m and HIGH_BF_TH > float(m) > LOW_BF_TH]
+    return statistics.median(comment_est) if comment_est else None
+
+
 def process_csv_for_image_prediction(csv_file):
     """Adds columns---'comment_bf', 'bf_est' and 'bf_bin' to the given csv_file.
     comment_bf is an estimation extracted from each comment, 'bf_est' is the mean of all comments estimations, and
@@ -122,15 +131,6 @@ def process_csv_for_image_prediction(csv_file):
     # Create a string representation of the range for each "bf" value
     df["bf_bin"] = df.apply(lambda row: f"{row['range_start']}-{row['range_end']}", axis=1)
     df.to_csv(csv_file, index=False)
-
-
-def get_comment_bf_est(comment):
-    """ Extract a bf% estimate from a given comment """
-    pattern = r'\b\d+\.\d|\b\d\'?\d?\b'
-    comment_est = re.findall(pattern, comment)
-    # remove numbers with inches (e.g., 5'7) and numbers which are too large or too small (probably not bf)
-    comment_est = [float(m) for m in comment_est if "'" not in m and HIGH_BF_TH > float(m) > LOW_BF_TH]
-    return statistics.median(comment_est) if comment_est else None
 
 
 def create_folder_bin(raw_data, photos_path):
@@ -176,5 +176,4 @@ if __name__ == "__main__":
     filter_comments_with_low_score(SCRAPED_DATA_CSV_PATH)
     process_csv_for_image_prediction(SCRAPED_DATA_CSV_PATH)
     create_folder_bin(SCRAPED_DATA_CSV_PATH, photos_path=args.photos_output_dir)
-
     get_bf_hist(csv_path=SCRAPED_DATA_CSV_PATH)
